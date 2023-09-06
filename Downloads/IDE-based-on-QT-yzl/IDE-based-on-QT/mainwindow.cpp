@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     //代码提示词全录入
     QsciAPIs *apis = new QsciAPIs(globalLexer);
     foreach (const QString &keyword, Keywords::keywords)
-      apis->add(keyword);
+        apis->add(keyword);
 
 
 
@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
     tabWidget->addTab(new QWidget(), "");
     tabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, addButton);
 
-     /************ 文件数与小地图建立 ************/
+    /************ 文件数与小地图建立 ************/
     tree1 = new Tree;
     minimapView = new QGraphicsView;
     minimapView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -70,11 +70,10 @@ MainWindow::MainWindow(QWidget *parent)
     createTab();
     connectImpl();
 
-     /************ 布局绑定 ************/
+    /************ 布局绑定 ************/
 
     // 创建一个垂直布局管理器
     QVBoxLayout *mainLayout = new QVBoxLayout;
-
     // 创建一个水平布局管理器，用于容纳文件树和右边所有
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
 
@@ -123,13 +122,18 @@ MainWindow::MainWindow(QWidget *parent)
     findDlg = new QDialog(this);
     findDlg->setWindowTitle(tr("查找"));
     findLineEdit = new QLineEdit(findDlg);
-    QPushButton *btn1= new QPushButton(tr("查找上一个"), findDlg);
+    changeEdit = new QLineEdit(findDlg);
+    QPushButton *btn1= new QPushButton(tr("查找第一个"), findDlg);
+    QPushButton *btn2= new QPushButton(tr("替换全部"), findDlg);
     //垂直布局
     QVBoxLayout *layout1= new QVBoxLayout(findDlg);
     layout1->addWidget(findLineEdit);
+    layout1->addWidget(changeEdit);
     layout1->addWidget(btn1);
+    layout1->addWidget(btn2);
     //将“查找下一个”按钮与自定义showFindText槽函数连接
     connect(btn1, SIGNAL(clicked()), this, SLOT(showFindText()));
+    connect(btn2, SIGNAL(clicked()), this, SLOT(changeText()));
 
 }
 void MainWindow::createTab() {
@@ -178,7 +182,7 @@ void MainWindow::createTab() {
     newScintilla->setAutoCompletionSource(QsciScintilla::AcsAPIs);
     newScintilla->setAutoCompletionThreshold(2);
 
-     // 设置严格的括号匹配
+    // 设置严格的括号匹配
     newScintilla->setBraceMatching(QsciScintilla::StrictBraceMatch);
 
     // 设置为UTF-8编码
@@ -336,10 +340,10 @@ void MainWindow::createTool()
     underlineBtn->setIcon(QIcon(":/icon/icon/underline.png"));
     toolBar->addWidget(underlineBtn);
 
-//    qDebug() << "addwidget";
+    //    qDebug() << "addwidget";
 
 
-//    qDebug() << "Highligher";
+    //    qDebug() << "Highligher";
 
 }
 
@@ -376,7 +380,7 @@ void MainWindow::connectImpl()
     connect(saveasfile,QAction::triggered,this,MainWindow::saveasFile);
 
     // 信号与槽-复制
-//    connect(copyText, &QAction::triggered, textEdit, &QsciScintilla::copy);
+    //    connect(copyText, &QAction::triggered, textEdit, &QsciScintilla::copy);
 
     // 连接按钮的点击信号到槽函数
     connect(copyText, &QAction::triggered, this, [=]() {
@@ -385,7 +389,7 @@ void MainWindow::connectImpl()
     });
 
     // 信号与槽-剪切
-//    connect(cutText, &QAction::triggered, textEditor, &QsciScintilla::cut);
+    //    connect(cutText, &QAction::triggered, textEditor, &QsciScintilla::cut);
 
     connect(cutText, &QAction::triggered, this, [=]() {
         // 执行QScintilla的复制操作
@@ -393,7 +397,7 @@ void MainWindow::connectImpl()
     });
 
     // 信号与槽-粘贴
-//    connect(pasteText, &QAction::triggered, textEditor, &QsciScintilla::paste);
+    //    connect(pasteText, &QAction::triggered, textEditor, &QsciScintilla::paste);
 
     connect(pasteText, &QAction::triggered, this, [=]() {
         // 执行QScintilla的复制操作
@@ -406,11 +410,11 @@ void MainWindow::connectImpl()
     });
     //信号与槽-字体设置
     connect(fontSet,QAction::triggered,[=]{
-      bool fontSelected;
-      QFont font = QFontDialog::getFont(&fontSelected,this);
-      if(fontSelected){
-          curScintilla->setFont(font);
-      }
+        bool fontSelected;
+        QFont font = QFontDialog::getFont(&fontSelected,this);
+        if(fontSelected){
+            curScintilla->setFont(font);
+        }
     });
 
     /************ 工具栏的字体设置 ************/
@@ -427,7 +431,7 @@ void MainWindow::connectImpl()
 
     //信号与槽-字体下划线
     connect(underlineBtn,QToolButton::clicked,this,MainWindow::setUnderline);
-//    (QTreeWidgetItem *item, int column)
+    //    (QTreeWidgetItem *item, int column)
 
 
     //信号与槽-文件编译
@@ -438,7 +442,7 @@ void MainWindow::connectImpl()
     qDebug()<<2;
 }
 
-    /*************  自定义槽函数的实现 *************/
+/*************  自定义槽函数的实现 *************/
 
 void MainWindow::showMinimap() {
     // 获取 QScintilla 控件的内容
@@ -539,43 +543,43 @@ void MainWindow::onTabClicked(int index) {
 // 双击tab，修改标签title
 void MainWindow::onTabDoubleClicked(int index) {
     QString tabTitle = tabWidget->tabText(index);
-        QsciScintilla *tabScintilla = tabScintillaMap[tabTitle];
-        curScintilla = tabScintilla;
-        qDebug() << "成功切换";
+    QsciScintilla *tabScintilla = tabScintillaMap[tabTitle];
+    curScintilla = tabScintilla;
+    qDebug() << "成功切换";
 
-        bool ok;
-        QString newTabTitle = QInputDialog::getText(this, "修改标签", "请输入新标签", QLineEdit::Normal, tabTitle, &ok);
+    bool ok;
+    QString newTabTitle = QInputDialog::getText(this, "修改标签", "请输入新标签", QLineEdit::Normal, tabTitle, &ok);
 
-        if (ok && !newTabTitle.isEmpty() && tabScintillaMap.find(newTabTitle)== tabScintillaMap.end()) {
-            tabScintillaMap.remove(tabTitle);
-            tabScintillaMap.insert(newTabTitle,tabScintilla);
-            tabWidget->setTabText(index, newTabTitle);
-        }
-        else if(ok){
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText("该名称重复或不可用，请重新输入");
-            msgBox.setWindowTitle("错误");
-            msgBox.exec();
-        }
+    if (ok && !newTabTitle.isEmpty() && tabScintillaMap.find(newTabTitle)== tabScintillaMap.end()) {
+        tabScintillaMap.remove(tabTitle);
+        tabScintillaMap.insert(newTabTitle,tabScintilla);
+        tabWidget->setTabText(index, newTabTitle);
+    }
+    else if(ok){
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("该名称重复或不可用，请重新输入");
+        msgBox.setWindowTitle("错误");
+        msgBox.exec();
+    }
 
 }
 
 // 看样子是打开函数的方法
 void MainWindow::op()
 {
-//    qDebug() << "yes";
+    //    qDebug() << "yes";
     if(tree1->filePath != "null"){
         qDebug()<<"open  "<<tree1->filePath;
         QFile f(tree1->filePath);
         if(f.open(QIODevice::ReadWrite)){
-               QTextStream in(&f);
-               QString fcontent = in.readAll();
-               curScintilla->setText(fcontent);
-               f.close();
-         }else{
-               qDebug()<<"open file failed!";
-//               return;
+            QTextStream in(&f);
+            QString fcontent = in.readAll();
+            curScintilla->setText(fcontent);
+            f.close();
+        }else{
+            qDebug()<<"open file failed!";
+            //               return;
         }
         tree1->filePath = "null";
         return;
@@ -611,12 +615,12 @@ void MainWindow::FileNew()
 
 //槽函数实现-新建文件
 void MainWindow::newFile(){
-  if(maybeSave()){
-      isUnititled = true;
-      curFile = tr(".c");
-      setWindowTitle(curFile);
-      createTab();
-  }
+    if(maybeSave()){
+        isUnititled = true;
+        curFile = tr(".c");
+        setWindowTitle(curFile);
+        createTab();
+    }
 }
 
 //判断是否保存过
@@ -666,28 +670,28 @@ bool MainWindow::saveFile(const QString &fileName){
     QFile f(fileName);
 
     if(f.open(QIODevice::ReadWrite)){
-           QTextStream fin(&f);
-           fin<<curScintilla->text();
-     }else{
-           qDebug()<<"save file failed!";
-           return false;
+        QTextStream fin(&f);
+        fin<<curScintilla->text();
+    }else{
+        qDebug()<<"save file failed!";
+        return false;
     }
     isUnititled = false;
     //获得文件的标准路径
     curFile = QFileInfo(fileName).canonicalFilePath();
     setWindowTitle(curFile);
     path=curFile;
-     QString curFile = QFileInfo(fileName).canonicalFilePath();
-     QDir currentDir(curFile);
-     currentDir.cdUp(); // 切换到上级目录
-     QString parentDir = currentDir.canonicalPath(); // 获取上级目录的规范路径
-     int number = tree1->root->childCount();
-     for(int i = number - 1; i >= 0; i--){
-         tree1->root->removeChild(tree1->root->child(i));
-     }
-     tree1->root->setText(0,parentDir);
-     qDebug()<<parentDir;
-     QFileInfoList filelist = tree1->allfile(tree1->root,parentDir);
+    QString curFile = QFileInfo(fileName).canonicalFilePath();
+    QDir currentDir(curFile);
+    currentDir.cdUp(); // 切换到上级目录
+    QString parentDir = currentDir.canonicalPath(); // 获取上级目录的规范路径
+    int number = tree1->root->childCount();
+    for(int i = number - 1; i >= 0; i--){
+        tree1->root->removeChild(tree1->root->child(i));
+    }
+    tree1->root->setText(0,parentDir);
+    qDebug()<<parentDir;
+    QFileInfoList filelist = tree1->allfile(tree1->root,parentDir);
     return true;
 }
 
@@ -696,13 +700,13 @@ bool MainWindow::openFile(const QString &fileName)
 {
     QFile f(fileName);
     if(f.open(QIODevice::ReadWrite)){
-           QTextStream in(&f);
-           QString fcontent = in.readAll();
-           curScintilla->setText(fcontent);
-           f.close();
-     }else{
-           qDebug()<<"open file failed!";
-           return false;
+        QTextStream in(&f);
+        QString fcontent = in.readAll();
+        curScintilla->setText(fcontent);
+        f.close();
+    }else{
+        qDebug()<<"open file failed!";
+        return false;
     }
     curFile = QFileInfo(fileName).canonicalFilePath();
     setWindowTitle(curFile);
@@ -721,13 +725,35 @@ bool MainWindow::openFile(const QString &fileName)
 
 }
 
-//槽函数实现-显示查找到的文本
 void MainWindow::showFindText() {
     // 获取查找文本
-    QString findText = findLineEdit->text();
+    QString searchText = findLineEdit->text();
+    qDebug()<< searchText;// 获取查找文本框的文本
+    int foundPos = curScintilla->findFirst(searchText, false,false, false, true); // 在文本中查找匹配项
+    qDebug()<<  foundPos;
+    if (foundPos != -1) {
+        curScintilla->SendScintilla(QsciScintillaBase::SCI_SETSEL, foundPos, foundPos + searchText.length()); // 选中匹配项
+    }
 
 }
 
+
+void MainWindow::changeText(){
+    //替换文本
+    // 获取查找文本和替换文本
+    QString target = findLineEdit->text();
+    QString to = changeEdit->text();
+
+    // 获取QsciScintilla文本内容
+    QString text = curScintilla->text();
+
+    // 使用QRegExp进行查找和替换
+    QRegExp rx(target);
+    text.replace(rx, to);
+
+    // 更新QsciScintilla文本内容
+    curScintilla->setText(text);
+}
 //槽函数实现-字体改变
 void MainWindow::setFont(const QFont &font)
 {
@@ -743,30 +769,30 @@ void MainWindow::setFontSize(int index)
 //槽函数实现-字体加粗
 void MainWindow::setBold()
 {
-//    qDebug()<<tree1->filePath;
-//  QFont font = textEdit->font();
+    //    qDebug()<<tree1->filePath;
+    //  QFont font = textEdit->font();
 
-//  if(font.bold()) {
-//    font.setBold(false);
-//  } else {
-//    font.setBold(true);
-//  }
+    //  if(font.bold()) {
+    //    font.setBold(false);
+    //  } else {
+    //    font.setBold(true);
+    //  }
 
-//  textEdit->setFont(font);
+    //  textEdit->setFont(font);
 }
 
 //槽函数实现-字体下划线
 void MainWindow::setUnderline()
 {
-  QFont font = curScintilla->font();
+    QFont font = curScintilla->font();
 
-  if(font.underline()) {
-    font.setUnderline(false);
-  } else {
-    font.setUnderline(true);
-  }
+    if(font.underline()) {
+        font.setUnderline(false);
+    } else {
+        font.setUnderline(true);
+    }
 
-  curScintilla->setFont(font);
+    curScintilla->setFont(font);
 }
 void MainWindow::compile_file()
 {

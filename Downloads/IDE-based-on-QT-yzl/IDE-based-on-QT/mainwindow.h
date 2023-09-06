@@ -113,11 +113,13 @@ private:
     QString fileName;       //文件路径
     int x;                  //横坐标
     int y;                  //纵坐标
+    QLineEdit *changeEdit;
 public slots:
     void op();
     void showMinimap();
 //私有槽showFindText()声明
 private slots:
+
     //创建窗口控件函数
     void createMenu();
     void createTool();
@@ -160,6 +162,6 @@ private slots:
     void FileNew();
     void undo();
     void redo();
-
+    void changeText();
 };
 #endif // MAINWINDOW_H
